@@ -1,29 +1,8 @@
-# 🔍 SMILES Hallucination Detection
+# 🔍 SMILES-2026 Hallucination Detection
 
 Detect whether a small language
 model's answer is *hallucinated* (fabricated) or *truthful* using the model's
 own internal representations (hidden states).
-
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Repository Structure](#repository-structure)
-3. [Pipeline](#pipeline)
-4. [Quick Start](#quick-start)
-   - [Google Colab](#google-colab)
-   - [Local Setup](#local-setup)
-5. [Dataset](#dataset)
-6. [What You Implement](#what-you-implement)
-7. [Evaluation](#evaluation)
-8. [Ways to Improve](#ways-to-improve)
-   - [Feature Extraction Techniques](#feature-extraction-techniques)
-   - [Probe Architecture](#probe-architecture)
-   - [Training & Optimisation](#training--optimisation)
-   - [Data Splitting](#data-splitting)
-9. [Submission](#submission)
-10. [Dependencies](#dependencies)
-
 
 ## Overview
 
