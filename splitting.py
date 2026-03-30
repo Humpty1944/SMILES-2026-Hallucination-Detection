@@ -50,12 +50,7 @@ def split_data(
         Replace or extend the skeleton below.  The only contract is that the
         function returns the list described above.
     """
-    # ------------------------------------------------------------------
-    # STUDENT: Pick ONE option below.  Comment out the others and make
-    # sure exactly one code path ends with a `return` statement.
-    # ------------------------------------------------------------------
 
-    # --- Option A: single stratified random split (default) -----------
     idx = np.arange(len(y))
 
     idx_train_val, idx_test = train_test_split(
@@ -72,32 +67,4 @@ def split_data(
         stratify=y[idx_train_val],
     )
     return [(idx_train, idx_val, idx_test)]
-    # ------------------------------------------------------------------
 
-    # --- Option B: stratified k-fold (comment out A, uncomment B) -----
-    # from sklearn.model_selection import StratifiedKFold
-    #
-    # K = 5
-    # kfold = StratifiedKFold(n_splits=K, shuffle=True, random_state=random_state)
-    # return [
-    #     (idx_tr, None, idx_te)
-    #     for idx_tr, idx_te in kfold.split(np.arange(len(y)), y)
-    # ]
-    # ------------------------------------------------------------------
-
-    # --- Option C: group-aware split (comment out A, uncomment C) -----
-    # Requires df with a column identifying the group, e.g. "question".
-    # from sklearn.model_selection import GroupShuffleSplit
-    #
-    # assert df is not None, "df must be provided for group-aware splitting"
-    # groups = df["question"].astype(str).values
-    # gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
-    # idx_train_val, idx_test = next(gss.split(np.arange(len(y)), y, groups=groups))
-    # idx_train, idx_val = train_test_split(
-    #     idx_train_val,
-    #     test_size=val_size / (1.0 - test_size),
-    #     random_state=random_state,
-    #     stratify=y[idx_train_val],
-    # )
-    # return [(idx_train, idx_val, idx_test)]
-    # ------------------------------------------------------------------
