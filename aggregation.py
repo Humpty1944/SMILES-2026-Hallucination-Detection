@@ -119,7 +119,7 @@ def extract_geometric_features(
     features.append(torch.pdist(tokens, p=2).mean().item() if tokens.size(0)>1 else 0.0) # mean dist between all vectors
     features.append(tokens.mean(dim=0).norm().item()) #len of the mean vector
 
-    return torch.tensor(features)
+    return torch.tensor(features, device = tokens.device)
 
 
 def aggregation_and_feature_extraction(
