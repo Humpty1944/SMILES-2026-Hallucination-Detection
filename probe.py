@@ -81,7 +81,7 @@ class HallucinationProbe(nn.Module):
         self._build_network(X_scaled.shape[1])
 
         self._net = LogisticRegression(C=0.01, class_weight="balanced", max_iter=5000, random_state=42)
-        self._classifier.fit(X_scaled, y)
+        self._net.fit(X_scaled, y)
 
         return self
 
@@ -146,7 +146,7 @@ class HallucinationProbe(nn.Module):
             Used to compute AUROC.
         """
         X_scaled = self._scaler.transform(X)
-        prob_pos = self._classifier.predict_proba(X_scaled)[:, 1]
+        prob_pos = self._net.predict_proba(X_scaled)[:, 1]
 
         return np.stack([1.0 - prob_pos, prob_pos], axis=1)
 
