@@ -18,9 +18,9 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold
 
-
+N_SPLITS=5
 def split_data(
     y: np.ndarray,
     df: pd.DataFrame | None = None,
@@ -50,21 +50,25 @@ def split_data(
         Replace or extend the skeleton below.  The only contract is that the
         function returns the list described above.
     """
-
     idx = np.arange(len(y))
+    skf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=random_state)
 
-    idx_train_val, idx_test = train_test_split(
-        idx,
-        test_size=test_size,
-        random_state=random_state,
-        stratify=y,
-    )
-    relative_val = val_size / (1.0 - test_size)
-    idx_train, idx_val = train_test_split(
-        idx_train_val,
-        test_size=relative_val,
-        random_state=random_state,
-        stratify=y[idx_train_val],
-    )
-    return [(idx_train, idx_val, idx_test)]
+    splits = []
+    for train_idx, test_idx in skf.split(idx, y):
+        if val_size>0:
+            train_idx_arr = np.array(train_idx)
+            y_train=y[train_idx_arr]
+            
+            train_final_idx, val_idx = train_test_split(
+                train_idx_arr,
+                test_size=val_size,
+                random_state=random_state,
+                stratify=y_train 
+            )
+
+            splits.append((train_final_idx, val_idx, test_idx))
+        else:
+            splits.append((train_idx, None, test_idx))
+
+    return splits
 

@@ -16,9 +16,12 @@ single entry point called from the notebook.
 """
 
 from __future__ import annotations
-
+import numpy as np
 import torch
 
+
+TARGET_LAYERS = [12, 13, 14, 15, 16, ]
+LAST_TOKENS_COUNT = 3
 
 def aggregate(
     hidden_states: torch.Tensor,
@@ -45,16 +48,34 @@ def aggregate(
     # STUDENT: Replace or extend the aggregation below.
     # ------------------------------------------------------------------
 
-    # Default: last real token of the final transformer layer.
-    layer = hidden_states[-1]          # (seq_len, hidden_dim)
+    real_positions = attention_mask.nonzero().squeeze()
+    
+    if real_positions.numel()==0:
+        return hidden_states[0][0]*0
 
-    # Find the index of the last real (non-padding) token.
-    real_positions = attention_mask.nonzero(as_tuple=False)  # (n_real, 1)
-    last_pos = int(real_positions[-1].item())                 # scalar index
+    features=[]
 
-    feature = layer[last_pos]          # (hidden_dim,)
+    for layer_idx in TARGET_LAYERS:
+        layer_states =hidden_states[layer_idx]
 
-    return feature
+        # last token with the most info
+        last_token = layer_states[real_positions[-1]]
+        features.append(last_token)
+
+        # mean pooling last LAST_TOKENS_COUNT tokens for stabilaizing
+        if len(real_positions)>=LAST_TOKENS_COUNT:
+            last_n_tokens = layer_states[real_positions[-LAST_TOKENS_COUNT:]]
+            mean_pool= last_n_tokens.mean(dim=0)
+            features.append(mean_pool)
+        else:
+            # if less than LAST_TOKENS_COUNT take mean
+            mean_pool = layer_states[real_positions].mean(dim=0)
+            features.append(mean_pool)
+
+    stacked = torch.stack(features, dim=0)
+    pooled = stacked.mean(dim=0) 
+
+    return pooled
     # ------------------------------------------------------------------
 
 
@@ -85,8 +106,20 @@ def extract_geometric_features(
     # STUDENT: Replace or extend the geometric feature extraction below.
     # ------------------------------------------------------------------
 
-    # Placeholder: returns an empty tensor (no geometric features).
-    return torch.zeros(0)
+    real_positions = attention_mask.nonzero().squeeze()
+    last_token_idx = real_positions[-1]
+
+    # for geometric takes last tokens for every TARGET_LAYERS
+    tokens = torch.stack([
+        hidden_states[layer_idx][last_token_idx]
+        for layer_idx in TARGET_LAYERS
+    ], dim=0)
+
+    features=[]
+    features.append(torch.pdist(tokens, p=2).mean().item() if tokens.size(0)>1 else 0.0) # mean dist between all vectors
+    features.append(tokens.mean(dim=0).norm().item()) #len of the mean vector
+
+    return torch.tensor(features)
 
 
 def aggregation_and_feature_extraction(
